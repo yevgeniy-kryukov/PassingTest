@@ -4,9 +4,7 @@ import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.List;
 
-//mark class as an Entity
 @Entity
-//defining class name as Table name
 @Table(schema = "main", name = "user_test")
 public class UserTest {
     @Id

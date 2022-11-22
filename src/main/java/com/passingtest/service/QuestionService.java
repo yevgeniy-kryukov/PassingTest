@@ -13,18 +13,15 @@ public class QuestionService {
     @Autowired
     QuestionRepository questionRepository;
 
-    public Question getQuestionById(int id)
-    {
+    public Question getQuestionById(int id) {
         return questionRepository.findById(id).get();
     }
 
-    public void saveOrUpdate(Question question)
-    {
+    public void saveOrUpdate(Question question) {
         questionRepository.save(question);
     }
 
-    public List<Question> getQuestionsByUserId(Integer testId)
-    {
+    public List<Question> getQuestionsByUserId(Integer testId) {
         List<Question> questions = new ArrayList<Question>();
         questionRepository.getQuestionsByUserId(testId).forEach(question1 -> questions.add(question1));
         return questions;

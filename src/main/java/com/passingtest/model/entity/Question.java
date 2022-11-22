@@ -4,9 +4,7 @@ import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.List;
 
-//mark class as an Entity
 @Entity
-//defining class name as Table name
 @Table(schema = "main", name = "question")
 public class Question {
     @Id

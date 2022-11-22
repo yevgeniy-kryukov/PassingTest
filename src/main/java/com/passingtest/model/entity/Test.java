@@ -3,9 +3,7 @@ package com.passingtest.model.entity;
 import javax.persistence.*;
 import java.util.List;
 
-//mark class as an Entity
 @Entity
-//defining class name as Table name
 @Table(schema = "main", name = "test")
 public class Test {
     @Id

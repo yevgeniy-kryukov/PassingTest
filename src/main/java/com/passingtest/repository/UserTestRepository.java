@@ -5,7 +5,6 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-//repository that extends CrudRepository
 public interface UserTestRepository extends CrudRepository<UserTest, Integer> {
     @Query("FROM UserTest WHERE userId =: userId")
     public Iterable<UserTest> findByUserId(@Param("userId") Integer userId);

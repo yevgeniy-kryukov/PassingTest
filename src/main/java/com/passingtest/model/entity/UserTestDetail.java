@@ -3,9 +3,7 @@ package com.passingtest.model.entity;
 import javax.persistence.*;
 import java.math.BigInteger;
 
-//mark class as an Entity
 @Entity
-//defining class name as Table name
 @Table(schema = "main", name = "user_test_detail")
 public class UserTestDetail {
     @Id

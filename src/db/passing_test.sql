@@ -191,4 +191,11 @@ ALTER TABLE IF EXISTS main.user_test_detail
     ON DELETE NO ACTION
     NOT VALID;
 
+create sequence main.answer_seq;
+create sequence main.question_seq;
+create sequence main.test_seq;
+create sequence main.user_seq;
+create sequence main.user_test_seq;
+create sequence main.user_test_detail_seq;
+
 COMMIT;

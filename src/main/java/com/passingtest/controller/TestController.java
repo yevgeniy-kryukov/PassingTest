@@ -17,8 +17,7 @@ public class TestController {
 
     //creating a get mapping that retrieves all the books detail from the database
     @GetMapping("/tests")
-    private List<Test> getAllTests()
-    {
+    private List<Test> getAllTests() {
         return testService.getAllTests();
     }
 }

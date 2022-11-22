@@ -7,5 +7,5 @@ import org.springframework.data.repository.query.Param;
 
 public interface QuestionRepository extends CrudRepository<Question, Integer> {
     @Query("FROM Question WHERE testId=:testId")
-    public Iterable<Question> getQuestionsByUserId(@Param("testId") Integer testId);
+    public Iterable<Question> getQuestionsByTestId(@Param("testId") Integer testId);
 }

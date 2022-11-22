@@ -21,9 +21,9 @@ public class QuestionService {
         questionRepository.save(question);
     }
 
-    public List<Question> getQuestionsByUserId(Integer testId) {
+    public List<Question> getQuestionsByTestId(Integer testId) {
         List<Question> questions = new ArrayList<Question>();
-        questionRepository.getQuestionsByUserId(testId).forEach(question1 -> questions.add(question1));
+        questionRepository.getQuestionsByTestId(testId).forEach(question1 -> questions.add(question1));
         return questions;
     }
 }

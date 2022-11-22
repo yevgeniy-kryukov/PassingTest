@@ -198,4 +198,19 @@ create sequence main.user_seq;
 create sequence main.user_test_seq;
 create sequence main.user_test_detail_seq;
 
+ALTER TABLE IF EXISTS main.user_test_detail
+    ADD FOREIGN KEY (question_id)
+    REFERENCES main.question (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
+
+ALTER TABLE IF EXISTS main.user_test_detail
+    ADD FOREIGN KEY (answer_id)
+    REFERENCES main.answer (id) MATCH SIMPLE
+    ON UPDATE NO ACTION
+    ON DELETE NO ACTION
+    NOT VALID;
+
 COMMIT;

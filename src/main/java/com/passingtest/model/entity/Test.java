@@ -1,6 +1,7 @@
 package com.passingtest.model.entity;
 
 import javax.persistence.*;
+import java.math.BigInteger;
 import java.util.List;
 
 @Entity
@@ -10,7 +11,7 @@ public class Test {
     @Column(name = "id", unique = true, nullable = false)
     @SequenceGenerator(name = "idSeqTest", sequenceName = "main.test_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idSeqTest")
-    private Integer id;
+    private BigInteger id;
     @Column(name = "name")
     private String name;
     @Column(name = "min_level_correct")
@@ -26,15 +27,15 @@ public class Test {
     public Test() {
     }
 
-    public Test(Integer id) {
+    public Test(BigInteger id) {
         this.id = id;
     }
 
-    public Integer getId() {
+    public BigInteger getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(BigInteger id) {
         this.id = id;
     }
 

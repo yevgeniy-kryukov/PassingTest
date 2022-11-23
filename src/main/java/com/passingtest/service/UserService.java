@@ -8,11 +8,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserService {
@@ -25,9 +27,36 @@ public class UserService {
     @Autowired
     UserTestDetailRepository userTestDetailRepository;
 
-    private HashMap<UserTest, ArrayDeque<Question>> testQuestions;
+    @Autowired
+    QuestionService questionService;
 
-    private HashMap<UserTest, Integer> numberCorrectQuestions;
+    private Map<UserTest, ArrayDeque<Question>> testQuestions;
+
+    private Map<UserTest, Integer> numberCorrectQuestions;
+
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public void setUserTestRepository(UserTestRepository userTestRepository) {
+        this.userTestRepository = userTestRepository;
+    }
+
+    public void setUserTestDetailRepository(UserTestDetailRepository userTestDetailRepository) {
+        this.userTestDetailRepository = userTestDetailRepository;
+    }
+
+    public void setQuestionService(QuestionService questionService) {
+        this.questionService = questionService;
+    }
+
+    public Map<UserTest, ArrayDeque<Question>> getTestQuestions() {
+        return testQuestions;
+    }
+
+    public Map<UserTest, Integer> getNumberCorrectQuestions() {
+        return numberCorrectQuestions;
+    }
 
     public User getUserById(int id) {
         return userRepository.findById(id).get();
@@ -47,13 +76,13 @@ public class UserService {
         return userTests;
     }
 
-    public UserTest startUserTest(Integer userId, Integer testId) {
+    public UserTest startUserTest(BigInteger userId, BigInteger testId) {
         UserTest userTest = new UserTest();
         userTest.setTestId(testId);
         userTest.setStarted(new Timestamp(System.currentTimeMillis()));
         userTest.setUserId(userId);
         userTest.setNumberCorrectQuestions(0);
-        userTestRepository.save(userTest);
+        userTest = userTestRepository.save(userTest);
         setQuestions(userTest);
         return userTest;
     }
@@ -68,7 +97,7 @@ public class UserService {
     }
 
     private void setQuestions(UserTest userTest) {
-        List<Question> questionsAll = new QuestionService().getQuestionsByTestId(userTest.getTestId());
+        List<Question> questionsAll = questionService.getQuestionsByTestId(userTest.getTestId());
         List<UserTestDetail> userTestDetails = userTest.getUserTestDetails();
         ArrayDeque<Question> questionArrayDeque = new ArrayDeque<Question>();
 
@@ -80,6 +109,9 @@ public class UserService {
                 }
             }
             questionArrayDeque.add(question);
+        }
+        if(testQuestions == null) {
+            testQuestions = new HashMap<>();
         }
 
         testQuestions.put(userTest, questionArrayDeque);

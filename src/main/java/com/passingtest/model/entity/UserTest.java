@@ -1,54 +1,62 @@
 package com.passingtest.model.entity;
 
 import javax.persistence.*;
+import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Objects;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 @Entity
 @Table(schema = "main", name = "user_test")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class UserTest {
     @Id
     @Column(name = "id", unique = true, nullable = false)
     @SequenceGenerator(name = "idSeqUserTest", sequenceName = "main.user_test_seq", allocationSize = 1)
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idSeqUserTest")
-    private Integer id;
-    @Column(name = "user_id")
-    private Integer userId;
-    @Column(name = "test_id")
-    private Integer testId;
-    @Column(name = "started")
+    private BigInteger id;
+    @Column(name = "user_id", nullable = false)
+    private BigInteger userId;
+    @Column(name = "test_id", nullable = false)
+    private BigInteger testId;
+    @Column(name = "started", nullable = false)
     private Timestamp started;
     @Column(name = "finished")
     private Timestamp finished;
-    @Column(name = "number_correct_questions")
+    @Column(name = "number_correct_questions", nullable = false)
     private Integer numberCorrectQuestions;
 
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_test_id")
     private List<UserTestDetail> userTestDetails;
 
-    public Integer getId() {
+    public BigInteger getId() {
         return id;
     }
 
-    public void setId(Integer id) {
+    public void setId(BigInteger id) {
         this.id = id;
     }
 
-    public Integer getUserId() {
+    public BigInteger getUserId() {
         return userId;
     }
 
-    public void setUserId(Integer userId) {
+    public void setUserId(BigInteger userId) {
         this.userId = userId;
     }
 
-    public Integer getTestId() {
+    public BigInteger getTestId() {
         return testId;
     }
 
-    public void setTestId(Integer testId) {
+    public void setTestId(BigInteger testId) {
         this.testId = testId;
     }
 

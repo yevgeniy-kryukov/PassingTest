@@ -3,6 +3,7 @@ package com.passingtest.model.entity;
 import javax.persistence.*;
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Table(schema = "main", name = "user_test")
@@ -81,5 +82,18 @@ public class UserTest {
 
     public void setUserTestDetails(List<UserTestDetail> userTestDetails) {
         this.userTestDetails = userTestDetails;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof UserTest)) return false;
+        UserTest userTest = (UserTest) o;
+        return id.equals(userTest.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

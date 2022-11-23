@@ -23,6 +23,13 @@ public class Test {
     @JoinColumn(name = "test_id")
     private List<UserTest> userTests;
 
+    public Test() {
+    }
+
+    public Test(Integer id) {
+        this.id = id;
+    }
+
     public Integer getId() {
         return id;
     }

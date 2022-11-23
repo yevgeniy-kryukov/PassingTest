@@ -12,7 +12,7 @@ public class UserTestDetail {
     @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "idSeqUserTestDetail")
     private BigInteger id;
     @Column(name = "user_test_id")
-    private BigInteger userTestId;
+    private Integer userTestId;
     @Column(name = "question_id")
     private BigInteger questionId;
     @Column(name = "answer_id")
@@ -26,11 +26,11 @@ public class UserTestDetail {
         this.id = id;
     }
 
-    public BigInteger getUserTestId() {
+    public Integer getUserTestId() {
         return userTestId;
     }
 
-    public void setUserTestId(BigInteger userTestId) {
+    public void setUserTestId(Integer userTestId) {
         this.userTestId = userTestId;
     }
 

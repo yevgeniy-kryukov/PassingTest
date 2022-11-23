@@ -213,4 +213,6 @@ ALTER TABLE IF EXISTS main.user_test_detail
     ON DELETE NO ACTION
     NOT VALID;
 
+alter table main.user_test_detail alter column user_test_id type integer;
+
 COMMIT;

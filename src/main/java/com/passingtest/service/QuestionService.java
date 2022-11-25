@@ -23,7 +23,7 @@ public class QuestionService {
 
     public List<Question> getQuestionsByTestId(Integer testId) {
         List<Question> questions = new ArrayList<Question>();
-        questionRepository.getQuestionsByTestId(testId).forEach(question1 -> questions.add(question1));
+        questionRepository.getQuestionsByTestId(testId).forEach(questions::add);
         return questions;
     }
 }

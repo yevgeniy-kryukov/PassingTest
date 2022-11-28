@@ -32,9 +32,8 @@ public class QuestionController {
         return question;
     }
 
-    @PutMapping("/updateQuestion/{id}")
-    public Question updateQuestion(@RequestBody Question question, @PathVariable("id") int id) {
-        question.setId(BigInteger.valueOf(id));
+    @PutMapping("/updateQuestion")
+    public Question updateQuestion(@RequestBody Question question) {
         questionService.saveOrUpdate(question);
         return question;
     }

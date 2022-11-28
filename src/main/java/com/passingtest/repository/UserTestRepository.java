@@ -5,8 +5,10 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.CrudRepository;
 import org.springframework.data.repository.query.Param;
 
-public interface UserTestRepository extends CrudRepository<UserTest, Integer> {
+import java.math.BigInteger;
+
+public interface UserTestRepository extends CrudRepository<UserTest, BigInteger> {
 
     @Query("FROM UserTest WHERE userId =: userId")
-    public Iterable<UserTest> findByUserId(@Param("userId") Integer userId);
+    public Iterable<UserTest> findByUserId(@Param("userId") BigInteger userId);
 }

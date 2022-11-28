@@ -213,6 +213,12 @@ ALTER TABLE IF EXISTS main.user_test_detail
     ON DELETE NO ACTION
     NOT VALID;
 
-alter table main.user_test_detail alter column user_test_id type integer;
+alter table main.test alter column id type bigint;
+alter table main.question alter column test_id type bigint;
+alter table main."user" alter column id type bigint;
+alter table main.user_test alter column id type bigint;
+alter table main.user_test alter column user_id type bigint;
+alter table main.user_test alter column test_id type bigint;
+alter table main.user_test_detail alter column user_test_id type bigint;
 
 COMMIT;

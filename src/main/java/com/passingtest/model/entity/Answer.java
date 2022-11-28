@@ -1,10 +1,18 @@
 package com.passingtest.model.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 import java.math.BigInteger;
+import java.util.Objects;
 
 @Entity
 @Table(schema = "main", name = "answer")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Answer {
     @Id
     @Column(name = "id", unique = true, nullable = false)
@@ -59,5 +67,18 @@ public class Answer {
 
     public void setImage(Byte[] image) {
         this.image = image;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Answer)) return false;
+        Answer answer = (Answer) o;
+        return id.equals(answer.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

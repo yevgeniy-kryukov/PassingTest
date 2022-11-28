@@ -2,10 +2,25 @@ package com.passingtest.model.entity;
 
 import javax.persistence.*;
 import java.math.BigInteger;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Objects;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
+import org.hibernate.annotations.Type;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
 
 @Entity
 @Table(schema = "main", name = "question")
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
 public class Question {
     @Id
     @Column(name = "id", unique = true, nullable = false)
@@ -15,9 +30,10 @@ public class Question {
     @Column(name = "name")
     private String name;
     @Column(name = "test_id")
-    private Integer testId;
+    private BigInteger testId;
     @Column(name = "image")
-    @Lob
+    //@Lob
+    @Type(type="org.hibernate.type.BinaryType")
     private Byte[] image;
 
     @OneToMany(fetch = FetchType.LAZY)
@@ -40,11 +56,11 @@ public class Question {
         this.name = name;
     }
 
-    public Integer getTestId() {
+    public BigInteger getTestId() {
         return testId;
     }
 
-    public void setTestId(Integer testId) {
+    public void setTestId(BigInteger testId) {
         this.testId = testId;
     }
 
@@ -62,5 +78,29 @@ public class Question {
 
     public void setAnswers(List<Answer> answers) {
         this.answers = answers;
+    }
+
+    @Override
+    public String toString() {
+        return "Question{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", testId=" + testId +
+                ", image=" + Arrays.toString(image) +
+                ", answers=" + answers +
+                '}';
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (!(o instanceof Question)) return false;
+        Question question = (Question) o;
+        return id.equals(question.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id);
     }
 }

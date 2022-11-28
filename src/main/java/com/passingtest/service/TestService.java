@@ -7,6 +7,7 @@ import com.passingtest.repository.TestRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,7 +28,7 @@ public class TestService {
                 .collect(Collectors.toList());
     }
 
-    public Test getTestById(int id) throws ObjectNotFoundException {
+    public Test getTestById(BigInteger id) throws ObjectNotFoundException {
         return testRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(id, Test.class));
     }
@@ -37,6 +38,6 @@ public class TestService {
     }
 
     public void delete(int id) {
-        testRepository.delete(new Test(id));
+        testRepository.delete(new Test(BigInteger.valueOf(id)));
     }
 }

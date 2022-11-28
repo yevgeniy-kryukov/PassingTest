@@ -1,18 +1,24 @@
 package com.passingtest.service;
 
+import com.passingtest.exception.ObjectNotFoundException;
 import com.passingtest.model.entity.*;
 import com.passingtest.repository.UserRepository;
 import com.passingtest.repository.UserTestDetailRepository;
 import com.passingtest.repository.UserTestRepository;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.math.BigInteger;
 import java.sql.Timestamp;
+
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserService {
@@ -25,9 +31,40 @@ public class UserService {
     @Autowired
     UserTestDetailRepository userTestDetailRepository;
 
-    private HashMap<UserTest, ArrayDeque<Question>> testQuestions;
+    @Autowired
+    QuestionService questionService;
 
-    private HashMap<UserTest, Integer> numberCorrectQuestions;
+    @Autowired
+    AnswerService answerService;
+
+    private Map<UserTest, ArrayDeque<Question>> testQuestions = new HashMap<>();
+
+    private Map<UserTest, Integer> numberCorrectQuestions = new HashMap<>();
+
+
+    public void setUserRepository(UserRepository userRepository) {
+        this.userRepository = userRepository;
+    }
+
+    public void setUserTestRepository(UserTestRepository userTestRepository) {
+        this.userTestRepository = userTestRepository;
+    }
+
+    public void setUserTestDetailRepository(UserTestDetailRepository userTestDetailRepository) {
+        this.userTestDetailRepository = userTestDetailRepository;
+    }
+
+    public void setQuestionService(QuestionService questionService) {
+        this.questionService = questionService;
+    }
+
+    public Map<UserTest, ArrayDeque<Question>> getTestQuestions() {
+        return testQuestions;
+    }
+
+    public Map<UserTest, Integer> getNumberCorrectQuestions() {
+        return numberCorrectQuestions;
+    }
 
     public User getUserById(int id) {
         return userRepository.findById(id).get();
@@ -37,28 +74,38 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public UserTest getUserTestById(Integer id) {
-        return userTestRepository.findById(id).get();
+    public UserTest getUserTestById(BigInteger id) {
+        return userTestRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException(id, UserTest.class));
     }
 
-    public List<UserTest> getUserTestsByUserId(Integer userId) {
+    public void setAnswerService(AnswerService answerService) {
+        this.answerService = answerService;
+    }
+
+    public List<UserTest> getUserTestsByUserId(BigInteger userId) {
         List<UserTest> userTests = new ArrayList<UserTest>();
         userTestRepository.findByUserId(userId).forEach((userTest) -> userTests.add(userTest));
         return userTests;
     }
 
-    public UserTest startUserTest(Integer userId, Integer testId) {
+    public UserTest startUserTest(BigInteger userId, BigInteger testId) {
         UserTest userTest = new UserTest();
         userTest.setTestId(testId);
         userTest.setStarted(new Timestamp(System.currentTimeMillis()));
         userTest.setUserId(userId);
         userTest.setNumberCorrectQuestions(0);
-        userTestRepository.save(userTest);
+        userTest = userTestRepository.save(userTest);
+        numberCorrectQuestions.put(userTest, 0);
         setQuestions(userTest);
         return userTest;
     }
 
     public void continueUserTest(UserTest userTest) {
+        if (userTest.getFinished() != null) {
+            throw new RuntimeException("Тест был завершен, прохождение теста невозможно!");
+        }
+        numberCorrectQuestions.put(userTest, userTest.getNumberCorrectQuestions());
         setQuestions(userTest);
     }
 
@@ -68,7 +115,7 @@ public class UserService {
     }
 
     private void setQuestions(UserTest userTest) {
-        List<Question> questionsAll = new QuestionService().getQuestionsByTestId(userTest.getTestId());
+        List<Question> questionsAll = questionService.getQuestionsByTestId(userTest.getTestId());
         List<UserTestDetail> userTestDetails = userTest.getUserTestDetails();
         ArrayDeque<Question> questionArrayDeque = new ArrayDeque<Question>();
 
@@ -81,17 +128,28 @@ public class UserService {
             }
             questionArrayDeque.add(question);
         }
+        if(testQuestions == null) {
+            testQuestions = new HashMap<>();
+        }
 
         testQuestions.put(userTest, questionArrayDeque);
     }
 
     public Question getNextQuestion(UserTest userTest) {
-        return testQuestions.get(userTest).pollFirst();
+        if (testQuestions.get(userTest) != null) {
+            return testQuestions.get(userTest).peekFirst();
+        }
+        return null;
     }
 
     @Transactional
     public void saveAnswers(UserTest userTest, Question question, List<Answer> answers) {
-        AnswerService answerService = new AnswerService();
+        if ((testQuestions.get(userTest) == null) || (testQuestions.get(userTest) != null && testQuestions.get(userTest).size() == 0)) {
+            throw new RuntimeException("Вопросы теста не найдены!");
+        }
+        if (!testQuestions.get(userTest).contains(question) || !userTest.getTestId().equals(question.getTestId())) {
+            throw new RuntimeException("Вопрос не относится к данному тесту!");
+        }
         if (answerService.isSelectedQuestionAnswersIsCorrect(question, answers)) {
             Integer numberQuestions = numberCorrectQuestions.get(userTest);
             numberQuestions++;
@@ -100,6 +158,7 @@ public class UserService {
             userTestRepository.save(userTest);
         }
         saveDetail(userTest, question, answers);
+        testQuestions.get(userTest).removeFirst();
     }
 
     private void saveDetail(UserTest userTest, Question question, List<Answer> answers) {

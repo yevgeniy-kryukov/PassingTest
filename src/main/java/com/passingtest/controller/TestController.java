@@ -39,9 +39,8 @@ public class TestController {
         testService.saveOrUpdate(test);
         return test;
     }
-    @PutMapping("/updateTest/{id}")
-    public Test updateTest(@RequestBody Test test, @PathVariable("id") int id) {
-        test.setId(BigInteger.valueOf(id));
+    @PutMapping("/updateTest")
+    public Test updateTest(@RequestBody Test test) {
         testService.saveOrUpdate(test);
         return test;
     }

@@ -1,7 +1,9 @@
 package com.passingtest.service;
 
+import com.passingtest.exception.ObjectNotFoundException;
 import com.passingtest.model.entity.Question;
 import com.passingtest.repository.QuestionRepository;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -15,7 +17,8 @@ public class QuestionService {
     QuestionRepository questionRepository;
 
     public Question getQuestionById(BigInteger id) {
-        return questionRepository.findById(id).get();
+        return questionRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException(id.intValue(), Question.class));
     }
 
     public void saveOrUpdate(Question question) {
@@ -23,7 +26,7 @@ public class QuestionService {
     }
 
     public List<Question> getQuestionsByTestId(BigInteger testId) {
-        List<Question> questions = new ArrayList<Question>();
+        List<Question> questions = new ArrayList<>();
         questionRepository.getQuestionsByTestId(testId).forEach(questions::add);
         return questions;
     }

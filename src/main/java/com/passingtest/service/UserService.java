@@ -1,9 +1,12 @@
 package com.passingtest.service;
 
+import com.passingtest.exception.ObjectNotFoundException;
 import com.passingtest.model.entity.*;
 import com.passingtest.repository.UserRepository;
 import com.passingtest.repository.UserTestDetailRepository;
 import com.passingtest.repository.UserTestRepository;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -67,7 +70,8 @@ public class UserService {
     }
 
     public UserTest getUserTestById(Integer id) {
-        return userTestRepository.findById(id).get();
+        return userTestRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException(id, UserTest.class));
     }
 
     public List<UserTest> getUserTestsByUserId(Integer userId) {

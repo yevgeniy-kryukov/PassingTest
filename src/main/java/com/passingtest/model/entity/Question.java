@@ -4,6 +4,8 @@ import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.List;
 
+import org.hibernate.annotations.Type;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
@@ -24,7 +26,8 @@ public class Question {
     @Column(name = "test_id")
     private BigInteger testId;
     @Column(name = "image")
-    @Lob
+    //@Lob
+    @Type(type="org.hibernate.type.BinaryType")
     private Byte[] image;
 
     @OneToMany(fetch = FetchType.LAZY)

@@ -1,16 +1,24 @@
 package com.passingtest.service;
 
+import com.passingtest.exception.ObjectNotFoundException;
 import com.passingtest.model.entity.*;
 import com.passingtest.repository.UserRepository;
 import com.passingtest.repository.UserTestDetailRepository;
 import com.passingtest.repository.UserTestRepository;
+
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
-import java.util.*;
+
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Service
 public class UserService {
@@ -32,6 +40,7 @@ public class UserService {
     private Map<UserTest, ArrayDeque<Question>> testQuestions = new HashMap<>();
 
     private Map<UserTest, Integer> numberCorrectQuestions = new HashMap<>();
+
 
     public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -65,8 +74,9 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public UserTest getUserTestById(BigInteger id) {
-        return userTestRepository.findById(id).get();
+    public UserTest getUserTestById(Integer id) {
+        return userTestRepository.findById(id)
+                .orElseThrow(() -> new ObjectNotFoundException(id, UserTest.class));
     }
 
     public void setAnswerService(AnswerService answerService) {
@@ -117,6 +127,9 @@ public class UserService {
                 }
             }
             questionArrayDeque.add(question);
+        }
+        if(testQuestions == null) {
+            testQuestions = new HashMap<>();
         }
 
         testQuestions.put(userTest, questionArrayDeque);

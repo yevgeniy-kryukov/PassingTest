@@ -10,6 +10,12 @@ import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
 
+import org.hibernate.annotations.Type;
+
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 @Entity
 @Table(schema = "main", name = "question")
 @Builder
@@ -26,7 +32,8 @@ public class Question {
     @Column(name = "test_id")
     private BigInteger testId;
     @Column(name = "image")
-    @Lob
+    //@Lob
+    @Type(type="org.hibernate.type.BinaryType")
     private Byte[] image;
 
     @OneToMany(fetch = FetchType.LAZY)

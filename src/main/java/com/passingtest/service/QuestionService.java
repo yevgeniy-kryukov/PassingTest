@@ -18,7 +18,7 @@ public class QuestionService {
 
     public Question getQuestionById(BigInteger id) {
         return questionRepository.findById(id)
-                .orElseThrow(() -> new ObjectNotFoundException(id.intValue(), Question.class));
+                .orElseThrow(() -> new ObjectNotFoundException(id, Question.class));
     }
 
     public void saveOrUpdate(Question question) {

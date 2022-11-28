@@ -21,8 +21,8 @@ public class QuestionController {
     QuestionService questionService;
 
     @GetMapping("/question/{id}")
-    public Question getQuestionById(@PathVariable("id") int id) {
-        return questionService.getQuestionById(BigInteger.valueOf(id));
+    public Question getQuestionById(@PathVariable("id") BigInteger id) {
+        return questionService.getQuestionById(id);
     }
 
     @PostMapping("/saveQuestion")

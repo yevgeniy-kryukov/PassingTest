@@ -74,7 +74,7 @@ public class UserService {
         userRepository.save(user);
     }
 
-    public UserTest getUserTestById(Integer id) {
+    public UserTest getUserTestById(BigInteger id) {
         return userTestRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(id, UserTest.class));
     }

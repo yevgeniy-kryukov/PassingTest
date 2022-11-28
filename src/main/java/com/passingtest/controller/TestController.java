@@ -29,7 +29,7 @@ public class TestController {
     }
 
     @GetMapping("/test/{id}")
-    public Test getTestById(@PathVariable("id") int id) {
+    public Test getTestById(@PathVariable("id") BigInteger id) {
         return testService.getTestById(id);
     }
 

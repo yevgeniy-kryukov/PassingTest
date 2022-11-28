@@ -28,7 +28,7 @@ public class TestService {
                 .collect(Collectors.toList());
     }
 
-    public Test getTestById(int id) throws ObjectNotFoundException {
+    public Test getTestById(BigInteger id) throws ObjectNotFoundException {
         return testRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(id, Test.class));
     }

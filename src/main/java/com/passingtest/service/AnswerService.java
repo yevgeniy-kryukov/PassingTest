@@ -9,6 +9,7 @@ import com.passingtest.repository.AnswerRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigInteger;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -17,7 +18,7 @@ public class AnswerService {
     @Autowired
     AnswerRepository answerRepository;
 
-    public Answer getAnswerById(int id) throws ObjectNotFoundException {
+    public Answer getAnswerById(BigInteger id) throws ObjectNotFoundException {
         return answerRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(id, Answer.class));
     }
@@ -26,7 +27,7 @@ public class AnswerService {
         answerRepository.save(answer);
     }
 
-    public List<Answer> getAnswersByQuestionId(Integer questionId) {
+    public List<Answer> getAnswersByQuestionId(BigInteger questionId) {
         return answerRepository.findByAnswersByQuestionId(questionId);
     }
 

@@ -71,8 +71,6 @@ public class UserServiceTest {
                 .name("Question3")
                 .build());
 
-        when(questionService.getQuestionsByTestId(BigInteger.valueOf(1))).thenReturn(questions);
-
         List<UserTestDetail> userTestDetails = new ArrayList<>();
         userTestDetails.add(UserTestDetail.builder()
                 .id(BigInteger.valueOf(1L))
@@ -110,6 +108,7 @@ public class UserServiceTest {
 
     @Test
     public void startUserTestWhenAllQuestionsAnswered() {
+        when(questionService.getQuestionsByTestId(BigInteger.valueOf(1))).thenReturn(questions);
         when(userTestRepository.save(any())).thenReturn(userTest);
         userService.startUserTest(BigInteger.valueOf(1), BigInteger.valueOf(1));
         Map<UserTest, ArrayDeque<Question>> testQuestionsActual = userService.getTestQuestions();
@@ -122,6 +121,7 @@ public class UserServiceTest {
     public void startUserTestWhenNotAllQuestionsAnswered() {
         userTest.getUserTestDetails().remove(2);
 
+        when(questionService.getQuestionsByTestId(BigInteger.valueOf(1))).thenReturn(questions);
         when(userTestRepository.save(any())).thenReturn(userTest);
 
         userService.startUserTest(BigInteger.valueOf(1), BigInteger.valueOf(1));
@@ -149,6 +149,7 @@ public class UserServiceTest {
         userTest.getUserTestDetails().remove(2);
         userTest.getUserTestDetails().remove(1);
 
+        when(questionService.getQuestionsByTestId(BigInteger.valueOf(1))).thenReturn(questions);
         when(userTestRepository.save(any())).thenReturn(userTest);
         when(answerService.isSelectedQuestionAnswersIsCorrect(any(), anyList())).thenReturn(true);
         UserTest userTest = userService.startUserTest(BigInteger.valueOf(1), BigInteger.valueOf(1));
@@ -376,6 +377,7 @@ public class UserServiceTest {
 
     @Test
     public void continueUserTestNumberCorrectQuestions() {
+        when(questionService.getQuestionsByTestId(BigInteger.valueOf(1))).thenReturn(questions);
         userTest.setNumberCorrectQuestions(1);
         userService.continueUserTest(userTest);
         assertEquals(userTest.getNumberCorrectQuestions(), userService.getNumberCorrectQuestions().get(userTest));

@@ -41,23 +41,6 @@ public class UserService {
 
     private Map<UserTest, Integer> numberCorrectQuestions = new HashMap<>();
 
-
-    public void setUserRepository(UserRepository userRepository) {
-        this.userRepository = userRepository;
-    }
-
-    public void setUserTestRepository(UserTestRepository userTestRepository) {
-        this.userTestRepository = userTestRepository;
-    }
-
-    public void setUserTestDetailRepository(UserTestDetailRepository userTestDetailRepository) {
-        this.userTestDetailRepository = userTestDetailRepository;
-    }
-
-    public void setQuestionService(QuestionService questionService) {
-        this.questionService = questionService;
-    }
-
     public Map<UserTest, ArrayDeque<Question>> getTestQuestions() {
         return testQuestions;
     }
@@ -77,10 +60,6 @@ public class UserService {
     public UserTest getUserTestById(BigInteger id) {
         return userTestRepository.findById(id)
                 .orElseThrow(() -> new ObjectNotFoundException(id, UserTest.class));
-    }
-
-    public void setAnswerService(AnswerService answerService) {
-        this.answerService = answerService;
     }
 
     public List<UserTest> getUserTestsByUserId(BigInteger userId) {

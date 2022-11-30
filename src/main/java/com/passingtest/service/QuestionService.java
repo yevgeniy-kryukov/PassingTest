@@ -1,15 +1,16 @@
 package com.passingtest.service;
 
-import com.passingtest.exception.ObjectNotFoundException;
-import com.passingtest.model.entity.Question;
-import com.passingtest.repository.QuestionRepository;
+import java.math.BigInteger;
+import java.util.List;
+import java.util.stream.Collectors;
+import java.util.stream.StreamSupport;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.List;
+import com.passingtest.exception.ObjectNotFoundException;
+import com.passingtest.model.entity.Question;
+import com.passingtest.repository.QuestionRepository;
 
 @Service
 public class QuestionService {
@@ -26,8 +27,7 @@ public class QuestionService {
     }
 
     public List<Question> getQuestionsByTestId(BigInteger testId) {
-        List<Question> questions = new ArrayList<>();
-        questionRepository.getQuestionsByTestId(testId).forEach(questions::add);
-        return questions;
+        return StreamSupport.stream(questionRepository.getQuestionsByTestId(testId).spliterator(), false)
+                .collect(Collectors.toList());
     }
 }

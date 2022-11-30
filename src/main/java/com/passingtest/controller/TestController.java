@@ -36,13 +36,16 @@ public class TestController {
     @ResponseStatus(HttpStatus.CREATED)
     @PostMapping("/saveTest")
     public Test saveTest(@RequestBody Test test) {
-        testService.saveOrUpdate(test);
-        return test;
-    }
-    @PutMapping("/updateTest")
-    public Test updateTest(@RequestBody Test test) {
-        testService.saveOrUpdate(test);
-        return test;
+        return saveOrUpdate(test);
     }
 
+    @PutMapping("/updateTest")
+    public Test updateTest(@RequestBody Test test) {
+        return saveOrUpdate(test);
+    }
+
+    private Test saveOrUpdate(Test test) {
+        testService.saveOrUpdate(test);
+        return test;
+    }
 }

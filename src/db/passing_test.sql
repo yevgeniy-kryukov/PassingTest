@@ -221,4 +221,7 @@ alter table main.user_test alter column user_id type bigint;
 alter table main.user_test alter column test_id type bigint;
 alter table main.user_test_detail alter column user_test_id type bigint;
 
+alter table main.user_test add column is_test_passed boolean default false;
+comment on column main.user_test.is_test_passed is '1-тест пройден, 0-нет';
+
 COMMIT;

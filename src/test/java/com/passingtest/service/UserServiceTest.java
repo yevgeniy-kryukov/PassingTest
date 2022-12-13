@@ -2,6 +2,8 @@ package com.passingtest.service;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import com.passingtest.exception.AppNotFoundException;
+import com.passingtest.exception.AppValidationException;
 import com.passingtest.model.entity.*;
 import com.passingtest.repository.UserRepository;
 import com.passingtest.repository.UserTestDetailRepository;
@@ -34,6 +36,8 @@ public class UserServiceTest {
 
     AnswerService answerService;
 
+    TestService testService;
+
     List<Question> questions = new ArrayList<>();
 
     List<Answer> answers = new ArrayList<>();
@@ -47,6 +51,7 @@ public class UserServiceTest {
         userTestDetailRepository = mock(UserTestDetailRepository.class);
         questionService = mock(QuestionService.class);
         answerService = mock(AnswerService.class);
+        testService = mock(TestService.class);
 
         userService = new UserService();
         userService.setUserRepository(userRepository);
@@ -54,6 +59,7 @@ public class UserServiceTest {
         userService.setUserTestDetailRepository(userTestDetailRepository);
         userService.setQuestionService(questionService);
         userService.setAnswerService(answerService);
+        userService.setTestService(testService);
 
         questions.add(Question.builder()
                 .id(BigInteger.valueOf(1L))
@@ -91,6 +97,13 @@ public class UserServiceTest {
                 .answerId(BigInteger.valueOf(3L))
                 .build());
 
+        com.passingtest.model.entity.Test test = com.passingtest.model.entity.Test.builder()
+                .id(BigInteger.valueOf(1))
+                .name("Test1")
+                .minLevelCorrect((short) 10)
+                .questions(questions)
+                .build();
+
         userTest = UserTest.builder()
                 .id(BigInteger.valueOf(1))
                 .testId(BigInteger.valueOf(1))
@@ -99,6 +112,8 @@ public class UserServiceTest {
                 .numberCorrectQuestions(0)
                 .userTestDetails(userTestDetails)
                 .build();
+
+        when(testService.getTestById(BigInteger.valueOf(1))).thenReturn(test);
     }
 
     @AfterEach
@@ -139,13 +154,16 @@ public class UserServiceTest {
     }
 
     @Test
-    public void getNextQuestionWithoutStartUserTest() {
-        Question question = userService.getNextQuestion(userTest);
-        assertNull(question);
+    public void getNextQuestionWithoutStartUserTest() throws AppNotFoundException {
+        AppNotFoundException thrown = assertThrows(AppNotFoundException.class, () -> {
+            userService.getNextQuestion(userTest);
+        }, "Ожидалось исключение AppNotFoundException");
+
+        Assertions.assertEquals("Вопросы теста не найдены! Тест еще не начат или тест уже завершен.", thrown.getMessage());
     }
 
     @Test
-    public void getNextQuestionWithStartUserTest() {
+    public void getNextQuestionWithStartUserTest() throws AppNotFoundException, AppValidationException {
         userTest.getUserTestDetails().remove(2);
         userTest.getUserTestDetails().remove(1);
 
@@ -180,7 +198,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void saveAnswersWithCorrectAnswersTest() {
+    public void saveAnswersWithCorrectAnswersTest() throws AppNotFoundException, AppValidationException {
         questions.add(Question.builder()
                 .id(BigInteger.valueOf(4L))
                 .name("Question4")
@@ -221,7 +239,6 @@ public class UserServiceTest {
 
         userService.saveAnswers(userTest, question, Arrays.asList(answers.get(0), answers.get(2)));
 
-        assertEquals(1, userService.getNumberCorrectQuestions().get(userTest));
         assertEquals(1, userTest.getNumberCorrectQuestions());
 
         assertTrue(userService.getTestQuestions().get(userTest).isEmpty());
@@ -230,7 +247,7 @@ public class UserServiceTest {
     }
 
     @Test
-    public void saveAnswersWithNotCorrectAnswersTest() {
+    public void saveAnswersWithNotCorrectAnswersTest() throws AppNotFoundException, AppValidationException {
         questions.add(Question.builder()
                 .id(BigInteger.valueOf(4L))
                 .name("Question4")
@@ -271,7 +288,6 @@ public class UserServiceTest {
 
         userService.saveAnswers(userTest, question, Arrays.asList(answers.get(0), answers.get(1)));
 
-        assertEquals(0, userService.getNumberCorrectQuestions().get(userTest));
         assertEquals(0, userTest.getNumberCorrectQuestions());
 
         assertTrue(userService.getTestQuestions().get(userTest).isEmpty());
@@ -309,11 +325,11 @@ public class UserServiceTest {
 
         userService.startUserTest(userTest.getUserId(), userTest.getTestId());
 
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+        AppNotFoundException thrown = assertThrows(AppNotFoundException.class, () -> {
             userService.saveAnswers(userTest, questions.get(2), Arrays.asList(answers.get(0), answers.get(1)));
-        }, "Ожидалось исключение RuntimeException");
+        }, "Ожидалось исключение AppNotFoundException");
 
-        Assertions.assertEquals("Вопросы теста не найдены!", thrown.getMessage());
+        Assertions.assertEquals("Вопросы теста не найдены! Тест еще не начат или тест уже завершен.", thrown.getMessage());
     }
 
     @Test
@@ -358,33 +374,25 @@ public class UserServiceTest {
 
         userService.startUserTest(userTest.getUserId(), userTest.getTestId());
 
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+        AppValidationException thrown = assertThrows(AppValidationException.class, () -> {
             userService.saveAnswers(userTest, question, Arrays.asList(answers.get(0), answers.get(1)));
-        }, "Ожидалось исключение RuntimeException");
+        }, "Ожидалось исключение AppValidationException");
 
-        Assertions.assertEquals("Вопрос не относится к данному тесту!", thrown.getMessage());
+        Assertions.assertEquals("Вопрос не относится к данному тесту или на вопрос уже был дан ответ!", thrown.getMessage());
     }
 
     @Test
     public void continueUserTestExceptionWhenFinished() {
         userTest.setFinished(new Timestamp(System.currentTimeMillis()));
-        RuntimeException thrown = assertThrows(RuntimeException.class, () -> {
+        AppValidationException thrown = assertThrows(AppValidationException.class, () -> {
             userService.continueUserTest(userTest);
-        }, "Ожидалось исключение RuntimeException");
+        }, "Ожидалось исключение AppValidationException");
 
         Assertions.assertEquals("Тест был завершен, прохождение теста невозможно!", thrown.getMessage());
     }
 
     @Test
-    public void continueUserTestNumberCorrectQuestions() {
-        when(questionService.getQuestionsByTestId(BigInteger.valueOf(1))).thenReturn(questions);
-        userTest.setNumberCorrectQuestions(1);
-        userService.continueUserTest(userTest);
-        assertEquals(userTest.getNumberCorrectQuestions(), userService.getNumberCorrectQuestions().get(userTest));
-    }
-
-    @Test
-    public void continueUserTestSetQuestions() {
+    public void continueUserTestSetQuestions() throws AppValidationException {
         questions.add(Question.builder()
                 .id(BigInteger.valueOf(4L))
                 .name("Question4")

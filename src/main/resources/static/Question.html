@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title id = "title">Тест</title>
+</head>
+<body>
+<h3 id="testName">Тест</h3>
+<div id="questionName"></div>
+<div id="answers" style="padding-left:25px"></div><br/>
+<input type="button" name="btnNext" value="Следующий вопрос" onclick="saveAnswers()"><br/><br/>
+<input type="button" name="btnNext" value="В список тестов" onclick="goToTests()">
+
+<script src="js/jquery-3.6.1.min.js"></script>
+<script language="JavaScript">
+        function goToTests() {
+            window.location.replace("UserTests.html?userId=" + userId + "&userName=" + encodeURIComponent(userName));
+        }
+
+        function getQuestion() {
+            $.ajax({
+              url: "/user/test/nextQuestion/" + userTestId,
+              success: function( result ) {
+                if (result.message && result.message == 'Вопросы закончились') {
+                    alert("Тест окончен!");
+                    finishTest();
+                    return;
+                }
+
+                var answersHTML = "";
+                questionId = result.id;
+                $("#questionName").html(result.name);
+                $.each(result.answers, function(index, row) {
+                    answersHTML = answersHTML + "<div style='margin-top:5px'>" +
+                                                    "<input type='checkbox' name='answer" + index + "' id='answer" + index + "' value='" + row.id + "'>" +
+                                                    "<label for='answer" + index + "'>" + row.name + "</label>" +
+                                                "</div>";
+                });
+                $("#answers").html(answersHTML);
+              }
+            });
+        }
+
+        function saveAnswers() {
+            if ($( "#answers input:checked" ).length == 0) {
+                alert("Ошибка! ответ на вопрос не указан");
+                return;
+            }
+
+            var answerIDS = [];
+            $( "#answers input:checked" ).each(function() {
+                answerIDS.push($(this).attr("value"));
+            });
+
+            $.ajax({
+              type: "POST",
+              url: "/user/test/saveAnswers",
+              data: { "userTestId": userTestId, "questionId" : questionId, "answerIDS": answerIDS.join() },
+              contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+              success: function( result ) {
+                console.log(result);
+                getQuestion(userTestId);
+              }
+            });
+        };
+
+        function finishTest() {
+            $.ajax({
+              type: "POST",
+              url: "/user/test/finish",
+              data: { "userTestId": userTestId },
+              contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+              success: function( result ) {
+                console.log(result);
+                goToTests();
+              }
+            });
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('userId');
+        const userName = urlParams.get('userName');
+        const userTestId = urlParams.get('userTestId');
+        const testName = urlParams.get('testName');
+        var questionId = null;
+
+        getQuestion();
+        $( "#testName" ).html(testName);
+        $( "#title" ).html(testName);
+</script>
+</body>
+</html>

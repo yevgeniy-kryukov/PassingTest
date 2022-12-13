@@ -9,6 +9,6 @@ import java.math.BigInteger;
 
 public interface UserTestRepository extends CrudRepository<UserTest, BigInteger> {
 
-    @Query("FROM UserTest WHERE userId =: userId")
+    @Query("FROM UserTest WHERE userId=:userId ORDER BY started DESC, id DESC")
     public Iterable<UserTest> findByUserId(@Param("userId") BigInteger userId);
 }

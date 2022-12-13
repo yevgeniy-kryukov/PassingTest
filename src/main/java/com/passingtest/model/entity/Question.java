@@ -12,10 +12,6 @@ import lombok.NoArgsConstructor;
 
 import org.hibernate.annotations.Type;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.NoArgsConstructor;
-
 @Entity
 @Table(schema = "main", name = "question")
 @Builder

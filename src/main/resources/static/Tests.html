@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Тесты</title>
+</head>
+<body>
+<h3>Тесты</h3>
+<table border="1" cellpadding="5" style="border-collapse:collapse">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>id</th>
+        <th>name</th>
+        <th>numberAllQuestions</th>
+        <th>minLevelCorrect</th>
+        <th style="visibility:hidden">startTest</th>
+    </tr>
+    </thead>
+    <tbody id="tests">
+    </tbody>
+</table><br/>
+<input type="button" name="btnNext" value="В список тестов" onclick="goToUserTests()">
+
+<script src="js/jquery-3.6.1.min.js"></script>
+<script language="JavaScript">
+        function goToUserTests() {
+            window.location.replace("UserTests.html?userId=" + userId + "&userName=" + encodeURIComponent(userName));
+        }
+
+        function startTest(pTestId, pTestName) {
+            $.ajax({
+              type: "POST",
+              url: "/user/test/start",
+              data: { "userId": userId, "testId": pTestId },
+              contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+              success: function( result ) {
+                console.log(result);
+                window.location.replace("Question.html?userTestId=" + result.id
+                                        + "&testName=" + encodeURIComponent(pTestName)
+                                        + "&userName=" + encodeURIComponent(userName)
+                                        + "&userId=" + userId);
+              }
+            });
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('userId');
+        const userName = urlParams.get('userName');
+
+        $.ajax({
+          url: "/tests",
+          success: function( result ) {
+            console.log(result);
+            var tbody = "";
+            $.each(result, function(index, row) {
+                tbody = tbody + "<tr>" +
+                                    "<td style='text-align: right'>" + (index + 1) + "</td>" +
+                                    "<td>" + row.id + "</td>" +
+                                    "<td>" + row.name + "</td>" +
+                                    "<td>" + row.numberAllQuestions + "</td>" +
+                                    "<td>" + row.minLevelCorrect + "</td>" +
+                                    "<td><input type='button' value='начать' onClick='startTest(" + row.id + ",\"" + row.name + "\")'></td>" +
+                                "</tr>";
+            });
+            $("#tests").html(tbody);
+          }
+        });
+
+</script>
+</body>
+</html>

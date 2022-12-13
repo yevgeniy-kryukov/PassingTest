@@ -1,5 +1,8 @@
 package com.passingtest.service;
 
+import com.passingtest.exception.AppAuthException;
+import com.passingtest.exception.AppNotFoundException;
+import com.passingtest.exception.AppValidationException;
 import com.passingtest.exception.ObjectNotFoundException;
 import com.passingtest.model.entity.*;
 import com.passingtest.repository.UserRepository;
@@ -14,11 +17,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 
-import java.util.ArrayDeque;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class UserService {
@@ -37,10 +36,10 @@ public class UserService {
     @Autowired
     AnswerService answerService;
 
-    private Map<UserTest, ArrayDeque<Question>> testQuestions = new HashMap<>();
+    @Autowired
+    TestService testService;
 
-    private Map<UserTest, Integer> numberCorrectQuestions = new HashMap<>();
-
+    private final Map<UserTest, ArrayDeque<Question>> testQuestions = new HashMap<>();
 
     public void setUserRepository(UserRepository userRepository) {
         this.userRepository = userRepository;
@@ -62,11 +61,7 @@ public class UserService {
         return testQuestions;
     }
 
-    public Map<UserTest, Integer> getNumberCorrectQuestions() {
-        return numberCorrectQuestions;
-    }
-
-    public User getUserById(int id) {
+    public User getUserById(BigInteger id) {
         return userRepository.findById(id).get();
     }
 
@@ -83,40 +78,55 @@ public class UserService {
         this.answerService = answerService;
     }
 
+    public void setTestService(TestService testService) {
+        this.testService = testService;
+    }
+
     public List<UserTest> getUserTestsByUserId(BigInteger userId) {
         List<UserTest> userTests = new ArrayList<UserTest>();
-        userTestRepository.findByUserId(userId).forEach((userTest) -> userTests.add(userTest));
+        userTestRepository.findByUserId(userId).forEach(userTests::add);
         return userTests;
     }
 
     public UserTest startUserTest(BigInteger userId, BigInteger testId) {
         UserTest userTest = new UserTest();
         userTest.setTestId(testId);
+        userTest.setTest(testService.getTestById(testId));
         userTest.setStarted(new Timestamp(System.currentTimeMillis()));
         userTest.setUserId(userId);
         userTest.setNumberCorrectQuestions(0);
         userTest = userTestRepository.save(userTest);
-        numberCorrectQuestions.put(userTest, 0);
         setQuestions(userTest);
         return userTest;
     }
 
-    public void continueUserTest(UserTest userTest) {
+    public UserTest continueUserTest(UserTest userTest) throws AppValidationException {
         if (userTest.getFinished() != null) {
-            throw new RuntimeException("Тест был завершен, прохождение теста невозможно!");
+            throw new AppValidationException("Тест был завершен, прохождение теста невозможно!");
         }
-        numberCorrectQuestions.put(userTest, userTest.getNumberCorrectQuestions());
         setQuestions(userTest);
+        return userTest;
     }
 
-    public void finishUserTest(UserTest userTest) {
+    private boolean getIsTestPassed(Integer numberCorrectQuestions, Short minLevelCorrect) {
+        return numberCorrectQuestions >= minLevelCorrect;
+    }
+
+    public UserTest finishUserTest(UserTest userTest) throws AppValidationException {
+        if (userTest.getFinished() != null) {
+            throw new AppValidationException("Тест уже завершен!");
+        }
         userTest.setFinished(new Timestamp(System.currentTimeMillis()));
+        userTest.setTestPassed(getIsTestPassed(userTest.getNumberCorrectQuestions(), userTest.getTest().getMinLevelCorrect()));
+        testQuestions.remove(userTest);
         userTestRepository.save(userTest);
+        return userTest;
     }
 
+    @Transactional(readOnly = true)
     private void setQuestions(UserTest userTest) {
         List<Question> questionsAll = questionService.getQuestionsByTestId(userTest.getTestId());
-        List<UserTestDetail> userTestDetails = userTest.getUserTestDetails();
+        List<UserTestDetail> userTestDetails = Optional.ofNullable(userTest.getUserTestDetails()).orElse(Collections.emptyList());
         ArrayDeque<Question> questionArrayDeque = new ArrayDeque<Question>();
 
         for1:
@@ -126,34 +136,37 @@ public class UserService {
                     continue for1;
                 }
             }
+            //загружаем ответы (FetchType.LAZY), объекты должны быть загружены в слое Service
+            //используем аннотацию @Transactional, чтобы сессия БД закрывалась только после выполнения метода
+            //https://stackoverflow.com/questions/15359306/how-to-fetch-fetchtype-lazy-associations-with-jpa-and-hibernate-in-a-spring-cont
+            if (question.getAnswers() != null) {
+                question.getAnswers().size();
+            }
             questionArrayDeque.add(question);
         }
-        if(testQuestions == null) {
-            testQuestions = new HashMap<>();
-        }
 
+        if (testQuestions.get(userTest) != null) testQuestions.remove(userTest);
         testQuestions.put(userTest, questionArrayDeque);
     }
 
-    public Question getNextQuestion(UserTest userTest) {
-        if (testQuestions.get(userTest) != null) {
-            return testQuestions.get(userTest).peekFirst();
+    public Question getNextQuestion(UserTest userTest) throws AppNotFoundException {
+        if (testQuestions.get(userTest) == null) {
+            throw new AppNotFoundException("Вопросы теста не найдены! Тест еще не начат или тест уже завершен.");
         }
-        return null;
+        return testQuestions.get(userTest).peekFirst();
     }
 
     @Transactional
-    public void saveAnswers(UserTest userTest, Question question, List<Answer> answers) {
+    public void saveAnswers(UserTest userTest, Question question, List<Answer> answers) throws AppValidationException, AppNotFoundException {
         if ((testQuestions.get(userTest) == null) || (testQuestions.get(userTest) != null && testQuestions.get(userTest).size() == 0)) {
-            throw new RuntimeException("Вопросы теста не найдены!");
+            throw new AppNotFoundException("Вопросы теста не найдены! Тест еще не начат или тест уже завершен.");
         }
         if (!testQuestions.get(userTest).contains(question) || !userTest.getTestId().equals(question.getTestId())) {
-            throw new RuntimeException("Вопрос не относится к данному тесту!");
+            throw new AppValidationException("Вопрос не относится к данному тесту или на вопрос уже был дан ответ!");
         }
         if (answerService.isSelectedQuestionAnswersIsCorrect(question, answers)) {
-            Integer numberQuestions = numberCorrectQuestions.get(userTest);
+            Integer numberQuestions = userTest.getNumberCorrectQuestions();
             numberQuestions++;
-            numberCorrectQuestions.put(userTest, numberQuestions);
             userTest.setNumberCorrectQuestions(numberQuestions);
             userTestRepository.save(userTest);
         }
@@ -171,7 +184,17 @@ public class UserService {
         }
     }
 
-    public boolean userAuthentication(String userName, String pwd) {
-        return false;
+    public User userAuthentication(String userName, String pwd) throws AppAuthException {
+        Iterable<User> userIterable = userRepository.findByName(userName);
+        if (!userIterable.iterator().hasNext()) {
+            throw new AppAuthException("Ошибка! Пользователь с таким именем не найден");
+        } else {
+            User user = userIterable.iterator().next();
+            if (!user.getPwd().equals(pwd)) {
+                throw new AppAuthException("Ошибка! Пароль не верный");
+            } else {
+                return user;
+            }
+        }
     }
 }

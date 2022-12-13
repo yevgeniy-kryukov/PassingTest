@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Аутентификация пользователя</title>
+</head>
+<body>
+<div style="width:300px;text-align:center;">
+    <h3>Аутентификация пользователя</h3>
+    <table cellpadding="5" align="center">
+        <tr>
+            <td align="right">Имя:</td>
+            <td><input type="text" name="userName" id="userName"></td>
+        </tr>
+        <tr>
+            <td align="right">Пароль:</td>
+            <td><input type="password" name="pwd" id="pwd"></td>
+        </tr>
+    </table>
+    <br/>
+    <input type="button" name="btnLogin" value="Войти" onclick="login()">
+</div>
+<script src="js/jquery-3.6.1.min.js"></script>
+<script language="JavaScript">
+        function login() {
+            $.ajax({
+              type: "POST",
+              url: "/user/auth",
+              //data: JSON.stringify({"userName": $("#userName").val(), "pwd": $("#pwd").val()}),
+              data: {"userName": $("#userName").val(), "pwd": $("#pwd").val()},
+              //contentType:"application/json; charset=utf-8",
+              contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+              //dataType:"json",
+              beforeSend: function (xhr) {
+                    xhr.setRequestHeader ("Authorization", "Basic " + btoa("user:password"));
+               },
+              success: function( result ) {
+                console.log(result);
+                window.location.replace("UserTests.html?userId=" + result.id + "&userName=" + encodeURIComponent(result.name));
+              },
+              error: function( result ) {
+                console.log(result);
+                alert(result.responseJSON.message);
+              },
+            });
+        };
+
+</script>
+</body>
+</html>

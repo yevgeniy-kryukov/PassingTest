@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Тесты пользователя</title>
+</head>
+<body>
+<h3>Тесты пользователя <span id="userName"></span></h3>
+<input type="button" name="bntStartTest" value="Начать новый тест" onclick="startTest()">
+<input type="button" name="bntLogout" value="Выйти" onclick="logout()">
+<br/><br/>
+<table border="1" cellpadding="5" style="border-collapse:collapse">
+    <thead>
+    <tr>
+        <th>#</th>
+        <th>id</th>
+        <th>testName</th>
+        <th>started</th>
+        <th>finished</th>
+        <th>numberAllQuestions</th>
+        <th>minLevelCorrect</th>
+        <th>numberCorrectQuestions</th>
+        <th>isTestPassed</th>
+        <th style="visibility:hidden">continueTest</th>
+    </tr>
+    </thead>
+    <tbody id="userTests">
+    </tbody>
+</table>
+
+<script src="js/jquery-3.6.1.min.js"></script>
+<script language="JavaScript">
+        function startTest() {
+            window.location.replace("Tests.html?userId=" + userId + "&userName=" + encodeURIComponent(userName));
+        };
+
+        function logout() {
+            window.location.replace("UserAuth.html?logout=1");
+        };
+
+        function continueTest(pUserTestId) {
+            $.ajax({
+              type: "POST",
+              url: "/user/test/continue",
+              data: { "userTestId": pUserTestId },
+              contentType: "application/x-www-form-urlencoded; charset=UTF-8",
+              success: function( result ) {
+                console.log(result);
+                window.location.replace("Question.html?userTestId=" + pUserTestId
+                                + "&testName=" + encodeURIComponent(result.testName)
+                                + "&userId=" + userId
+                                + "&userName=" + encodeURIComponent(userName));
+              }
+            });
+        };
+
+        const urlParams = new URLSearchParams(window.location.search);
+        const userId = urlParams.get('userId');
+        const userName = urlParams.get('userName');
+
+        $("#userName").html(userName);
+
+        $.ajax({
+          url: "/user/test/list/" + userId,
+          success: function( result ) {
+            console.log(result);
+            var tbody = "";
+            $.each(result, function(index, row) {
+                tbody = tbody + "<tr>" +
+                                    "<td style='text-align: right'>" + (index + 1) + "</td>" +
+                                    "<td>" + row.id + "</td>" +
+                                    "<td>" + row.testName + "</td>" +
+                                    "<td>" + row.started + "</td>" +
+                                    "<td>" + (row.finished == null ? "" : row.finished) + "</td>" +
+                                    "<td style='text-align: right'>" + row.numberAllQuestions + "</td>" +
+                                    "<td style='text-align: right'>" + row.minLevelCorrect + "</td>" +
+                                    "<td style='text-align: right'>" + row.numberCorrectQuestions + "</td>" +
+                                    "<td style='text-align: center;" + (row.testPassed ? "color:green;font-weight:bold;" : "") + "'>" + row.testPassed.toString() + "</td>" +
+                                    "<td>" + (row.finished == null ? "<input type='button' value='продолжить' onClick='continueTest(" + row.id + ")'>" : "&nbsp;") + "</td>" +
+                                "</tr>";
+            });
+            $("#userTests").html(tbody);
+          }
+        });
+
+
+</script>
+</body>
+</html>

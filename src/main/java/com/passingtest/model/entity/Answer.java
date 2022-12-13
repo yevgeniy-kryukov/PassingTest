@@ -1,8 +1,10 @@
 package com.passingtest.model.entity;
 
+import com.fasterxml.jackson.annotation.JsonFilter;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.NoArgsConstructor;
+import org.hibernate.annotations.Type;
 
 import javax.persistence.*;
 import java.math.BigInteger;
@@ -26,7 +28,8 @@ public class Answer {
     @Column(name = "question_id")
     private BigInteger questionId;
     @Column(name = "image")
-    @Lob
+    //@Lob
+    @Type(type = "org.hibernate.type.BinaryType")
     private Byte[] image;
 
     public BigInteger getId() {

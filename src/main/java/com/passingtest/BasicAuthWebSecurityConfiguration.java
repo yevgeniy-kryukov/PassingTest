@@ -13,12 +13,20 @@ import org.springframework.security.web.SecurityFilterChain;
 public class BasicAuthWebSecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+//        http
+//                .csrf().disable()
+//                .authorizeRequests().anyRequest().authenticated()
+//                .and()
+//                .httpBasic();
+//
+//        return http.build();
+
         http
                 .csrf().disable()
-                .authorizeRequests().anyRequest().authenticated()
+                .authorizeRequests()
+                .antMatchers("/user/auth").authenticated()
                 .and()
                 .httpBasic();
-
         return http.build();
     }
 

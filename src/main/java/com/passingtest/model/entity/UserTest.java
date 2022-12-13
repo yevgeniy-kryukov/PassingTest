@@ -36,6 +36,29 @@ public class UserTest {
     @JoinColumn(name = "user_test_id")
     private List<UserTestDetail> userTestDetails;
 
+    @ManyToOne(optional = false, fetch = FetchType.LAZY)
+    @JoinColumn(name = "test_id", referencedColumnName = "id", insertable = false, updatable = false, nullable = false)
+    private Test test;
+
+    @Column(name = "is_test_passed", nullable = false)
+    private Boolean isTestPassed = false;
+
+    public Boolean getTestPassed() {
+        return isTestPassed;
+    }
+
+    public void setTestPassed(Boolean testPassed) {
+        isTestPassed = testPassed;
+    }
+
+    public Test getTest() {
+        return test;
+    }
+
+    public void setTest(Test test) {
+        this.test = test;
+    }
+
     public BigInteger getId() {
         return id;
     }
@@ -103,5 +126,20 @@ public class UserTest {
     @Override
     public int hashCode() {
         return Objects.hash(id);
+    }
+
+    @Override
+    public String toString() {
+        return "UserTest{" +
+                "id=" + id +
+                ", userId=" + userId +
+                ", testId=" + testId +
+                ", started=" + started +
+                ", finished=" + finished +
+                ", numberCorrectQuestions=" + numberCorrectQuestions +
+                ", userTestDetails=" + userTestDetails +
+                ", test=" + test +
+                ", isTestPassed=" + isTestPassed +
+                '}';
     }
 }

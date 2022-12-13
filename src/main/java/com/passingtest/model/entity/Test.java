@@ -1,11 +1,18 @@
 package com.passingtest.model.entity;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.NoArgsConstructor;
+
 import javax.persistence.*;
 import java.math.BigInteger;
 import java.util.List;
 
 @Entity
 @Table(schema = "main", name = "test")
+@Builder
+@AllArgsConstructor
+@NoArgsConstructor
 public class Test {
     @Id
     @Column(name = "id", unique = true, nullable = false)
@@ -19,13 +26,6 @@ public class Test {
     @OneToMany(fetch = FetchType.LAZY)
     @JoinColumn(name = "test_id")
     private List<Question> questions;
-
-    @OneToMany(fetch = FetchType.LAZY)
-    @JoinColumn(name = "test_id")
-    private List<UserTest> userTests;
-
-    public Test() {
-    }
 
     public Test(BigInteger id) {
         this.id = id;
@@ -63,11 +63,13 @@ public class Test {
         this.questions = questions;
     }
 
-    public List<UserTest> getUserTests() {
-        return userTests;
-    }
-
-    public void setUserTests(List<UserTest> userTests) {
-        this.userTests = userTests;
+    @Override
+    public String toString() {
+        return "Test{" +
+                "id=" + id +
+                ", name='" + name + '\'' +
+                ", minLevelCorrect=" + minLevelCorrect +
+                ", questions=" + questions +
+                '}';
     }
 }

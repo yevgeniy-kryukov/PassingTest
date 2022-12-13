@@ -2,7 +2,10 @@ package com.passingtest.controller;
 
 import java.math.BigInteger;
 import java.util.List;
+import java.util.stream.Collectors;
 
+import com.passingtest.dto.TestDTO;
+import com.passingtest.mapper.TestMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -19,13 +22,13 @@ import com.passingtest.service.TestService;
 //mark class as Controller
 @RestController
 public class TestController {
-    //autowire the BooksService class
+
     @Autowired
     TestService testService;
 
     @GetMapping("/tests")
-    public List<Test> getAllTests() {
-        return testService.getAllTests();
+    public List<TestDTO> getAllTests() {
+        return testService.getAllTests().stream().map(TestMapper::toDto).filter(el->el.getNumberAllQuestions()>0).collect(Collectors.toList());
     }
 
     @GetMapping("/test/{id}")

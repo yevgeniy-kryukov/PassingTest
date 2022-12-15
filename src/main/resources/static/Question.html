@@ -19,7 +19,7 @@
 
         function getQuestion() {
             $.ajax({
-              url: "/user/test/nextQuestion/" + userTestId,
+              url: "/api/user/test/nextQuestion/" + userTestId,
               success: function( result ) {
                 if (result.message && result.message == 'Вопросы закончились') {
                     alert("Тест окончен!");
@@ -37,6 +37,12 @@
                                                 "</div>";
                 });
                 $("#answers").html(answersHTML);
+              },
+              statusCode: {
+                401: function() {
+                  alert( "Error! User not authenticated" );
+                  window.location.replace("UserAuth.html");
+                }
               }
             });
         }
@@ -54,7 +60,7 @@
 
             $.ajax({
               type: "POST",
-              url: "/user/test/saveAnswers",
+              url: "/api/user/test/saveAnswers",
               data: { "userTestId": userTestId, "questionId" : questionId, "answerIDS": answerIDS.join() },
               contentType: "application/x-www-form-urlencoded; charset=UTF-8",
               success: function( result ) {
@@ -67,7 +73,7 @@
         function finishTest() {
             $.ajax({
               type: "POST",
-              url: "/user/test/finish",
+              url: "/api/user/test/finish",
               data: { "userTestId": userTestId },
               contentType: "application/x-www-form-urlencoded; charset=UTF-8",
               success: function( result ) {

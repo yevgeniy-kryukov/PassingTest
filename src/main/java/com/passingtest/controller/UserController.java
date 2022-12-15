@@ -19,6 +19,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpSession;
 import java.math.BigInteger;
 import java.util.Collections;
 import java.util.List;
@@ -92,5 +94,12 @@ public class UserController {
     public ResponseEntity<UserDTO> userAuthentication(@RequestParam String userName, @RequestParam String pwd) throws AppAuthException {
         User user = userService.userAuthentication(userName, pwd);
         return ResponseEntity.ok(UserMapper.toDto(user));
+    }
+
+    @PostMapping(path = "/logout", produces = "application/json")
+    public ResponseEntity<Map<String,String>> userAuthentication(HttpServletRequest request)  {
+        HttpSession session=request.getSession();
+        session.invalidate();
+        return ResponseEntity.ok(Collections.singletonMap("message", "Сессия закрыта"));
     }
 }

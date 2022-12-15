@@ -25,7 +25,7 @@
         function login() {
             $.ajax({
               type: "POST",
-              url: "/user/auth",
+              url: "/api/user/auth",
               //data: JSON.stringify({"userName": $("#userName").val(), "pwd": $("#pwd").val()}),
               data: {"userName": $("#userName").val(), "pwd": $("#pwd").val()},
               //contentType:"application/json; charset=utf-8",

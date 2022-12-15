@@ -24,7 +24,7 @@ public class BasicAuthWebSecurityConfiguration {
         http
                 .csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/user/auth").authenticated()
+                .antMatchers("/api/**").authenticated()
                 .and()
                 .httpBasic();
         return http.build();

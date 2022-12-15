@@ -35,13 +35,20 @@
         };
 
         function logout() {
-            window.location.replace("UserAuth.html?logout=1");
+            $.ajax({
+              type: "POST",
+              url: "/api/user/logout",
+              success: function( result ) {
+                console.log(result);
+                window.location.replace("UserAuth.html?logout=1");
+              }
+            });
         };
 
         function continueTest(pUserTestId) {
             $.ajax({
               type: "POST",
-              url: "/user/test/continue",
+              url: "/api/user/test/continue",
               data: { "userTestId": pUserTestId },
               contentType: "application/x-www-form-urlencoded; charset=UTF-8",
               success: function( result ) {
@@ -61,7 +68,7 @@
         $("#userName").html(userName);
 
         $.ajax({
-          url: "/user/test/list/" + userId,
+          url: "/api/user/test/list/" + userId,
           success: function( result ) {
             console.log(result);
             var tbody = "";
@@ -80,6 +87,12 @@
                                 "</tr>";
             });
             $("#userTests").html(tbody);
+          },
+          statusCode: {
+            401: function() {
+              alert( "Error! User not authenticated" );
+              window.location.replace("UserAuth.html");
+            }
           }
         });
 
